@@ -1,4 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:medxecure/screens/admin/adminHome.dart';
+import 'package:medxecure/screens/createaccount/create_account_page.dart';
+import 'package:medxecure/screens/doctorhome/qr_code_scanner.dart';
+import 'dart:convert';
+
+import 'package:medxecure/screens/mainScreen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -19,12 +26,6 @@ class WelcomeScreen extends StatelessWidget {
                 right: 0,
                 child: Container(
                   height: MediaQuery.of(context).size.height * 0.4,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/login_bg.png'),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
                 ),
               ),
               // Back Button
@@ -43,7 +44,8 @@ class WelcomeScreen extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.15),
                       const Text(
                         'Welcome Back',
                         style: TextStyle(
@@ -56,6 +58,7 @@ class WelcomeScreen extends StatelessWidget {
                       Text(
                         'Login to your Account',
                         style: TextStyle(
+                          // ignore: deprecated_member_use
                           color: Colors.white.withOpacity(0.8),
                           fontSize: 16,
                         ),
@@ -88,6 +91,36 @@ class _LoginFormState extends State<LoginForm> {
   final TextEditingController passwordController = TextEditingController();
   bool rememberMe = false;
   bool _isPasswordVisible = false;
+
+  Future<void> userlogin() async {
+    if (emailController.text.isEmpty || passwordController.text.isEmpty) return;
+
+    var url = Uri.parse("http://localhost:3000/api/auth/login");
+    var response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "email": emailController.text.trim(),
+        "password": passwordController.text.trim()
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
+      print('Response Data: $responseData'); // Keep this for debugging
+
+      emailController.clear();
+      passwordController.clear();
+
+      // ignore: use_build_context_synchronously
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => Mainscreen()));
+    } else {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("No matching company found.")));
+    }
+  }
 
   @override
   void dispose() {
@@ -155,6 +188,7 @@ class _LoginFormState extends State<LoginForm> {
             // User Type Dropdown
             Container(
               decoration: BoxDecoration(
+                // ignore: deprecated_member_use
                 color: Colors.white.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -176,17 +210,19 @@ class _LoginFormState extends State<LoginForm> {
                   ),
                   items: ['Admin', 'Doctor', 'User']
                       .map((String value) => DropdownMenuItem<String>(
-                    value: value,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        value,
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ))
+                            value: value,
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              child: Text(value,
+                                  style: const TextStyle(color: Colors.white)),
+                            ),
+                          ))
                       .toList(),
                   onChanged: (newValue) {
+                    setState(() {
+                      selectedUserType = newValue;
+                    });
                     setState(() {
                       selectedUserType = newValue;
                     });
@@ -201,10 +237,12 @@ class _LoginFormState extends State<LoginForm> {
               controller: emailController,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.person_outline, color: Colors.white70),
+                prefixIcon:
+                    const Icon(Icons.person_outline, color: Colors.white70),
                 hintText: 'Username',
                 hintStyle: const TextStyle(color: Colors.white70),
                 filled: true,
+                // ignore: deprecated_member_use
                 fillColor: Colors.white.withOpacity(0.1),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -221,10 +259,12 @@ class _LoginFormState extends State<LoginForm> {
               obscureText: !_isPasswordVisible,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.lock_outline, color: Colors.white70),
+                prefixIcon:
+                    const Icon(Icons.lock_outline, color: Colors.white70),
                 hintText: 'Password',
                 hintStyle: const TextStyle(color: Colors.white70),
                 filled: true,
+                // ignore: deprecated_member_use
                 fillColor: Colors.white.withOpacity(0.1),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -233,13 +273,13 @@ class _LoginFormState extends State<LoginForm> {
                 errorStyle: const TextStyle(color: Colors.red),
                 suffixIcon: IconButton(
                   icon: Icon(
-                    _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                    _isPasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
                     color: Colors.white70,
                   ),
                   onPressed: () {
-                    setState(() {
-                      _isPasswordVisible = !_isPasswordVisible;
-                    });
+                    userlogin();
                   },
                 ),
               ),
@@ -260,7 +300,7 @@ class _LoginFormState extends State<LoginForm> {
                         });
                       },
                       fillColor: MaterialStateProperty.resolveWith<Color>(
-                            (Set<MaterialState> states) {
+                        (Set<MaterialState> states) {
                           if (states.contains(MaterialState.selected)) {
                             return const Color(0xFF00F7B1);
                           }
@@ -292,11 +332,20 @@ class _LoginFormState extends State<LoginForm> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: () {
-                  if (validateForm()) {
-                    // Changed navigation to home page
-                    Navigator.pushReplacementNamed(context, '/home');
+                onPressed: () async {
+                  if (emailController.text == 'admin@gmail.com' &&
+                      passwordController.text == '123456') {
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (ctx) => MedicineAdmin()));
                   }
+                  if (emailController.text == 'doctor@gmail.com' &&
+                      passwordController.text == '123456') {
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (ctx) => DoctorHomePage()));
+                  } else {
+                    await userlogin();
+                  }
+                  ;
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF00F7B1),
@@ -326,7 +375,8 @@ class _LoginFormState extends State<LoginForm> {
                 ),
                 TextButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/create-account');
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (ctx) => CreateAccountPage()));
                   },
                   child: const Text(
                     'Sign up',

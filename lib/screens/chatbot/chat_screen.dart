@@ -128,6 +128,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     return Scaffold(
       backgroundColor: EnhancedChatTheme.darkBlack,
       appBar: AppBar(
+        leading: IconButton(color: Colors.white,onPressed: () => Navigator.pop(context), icon: Icon(Icons.arrow_back_ios_new,)),
         backgroundColor: EnhancedChatTheme.surfaceBlack,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

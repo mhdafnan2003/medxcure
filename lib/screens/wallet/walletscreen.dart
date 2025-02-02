@@ -202,7 +202,7 @@ class _WalletScreenState extends State<WalletScreen> {
                             child: Icon(Icons.person, color: Colors.white),
                           ),
                           SizedBox(width: 10),
-                          Text('Nauras Shaji',
+                          Text('Username',
                               style: TextStyle(color: Colors.white)),
                         ],
                       ),

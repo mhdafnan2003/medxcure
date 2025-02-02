@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medxecure/screens/chatbot/chat_screen.dart';
 
 class DoctorListScreen extends StatelessWidget {
   const DoctorListScreen({super.key});
@@ -20,8 +21,8 @@ class DoctorListScreen extends StatelessWidget {
               color: Colors.white,
               size: 28,
             ),
-            onPressed: () {
-              // Add your chatbot logic here
+            onPressed: ()=> {
+              Navigator.of(context).push(MaterialPageRoute(builder: (ctx)=>ChatScreen()))
             },
           ),
           const SizedBox(width: 8),

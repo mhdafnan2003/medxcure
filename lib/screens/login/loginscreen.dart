@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:medxecure/screens/createaccount/create_account_page.dart';
 import 'dart:math' as math;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+
+import 'package:medxecure/screens/welcomeback/welcomeback.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -8,7 +13,8 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
@@ -49,7 +55,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Spacer(),
+                  SizedBox(
+                    height: 400,
+                  ),
 
                   // Animated Logo
                   TweenAnimationBuilder(
@@ -100,13 +108,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                   Column(
                     children: [
                       _buildAnimatedButton('LOGIN', () {
-                        Navigator.pushNamed(context, '/welcomeback');
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (ctx) => WelcomeScreen()));
                       }, isPrimary: true),
-
                       const SizedBox(height: 16),
-
                       _buildAnimatedButton('SIGN UP', () {
-                        Navigator.pushNamed(context, '/create-account');
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (ctx) => CreateAccountPage()));
                       }, isPrimary: false),
                     ],
                   ),
@@ -122,7 +130,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   }
 
   // Animated Button Builder
-  Widget _buildAnimatedButton(String text, VoidCallback onPressed, {required bool isPrimary}) {
+  Widget _buildAnimatedButton(String text, VoidCallback onPressed,
+      {required bool isPrimary}) {
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: 1200),
@@ -135,16 +144,21 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isPrimary ? const Color(0xFF70FACC) : Colors.transparent,
+                  backgroundColor:
+                      isPrimary ? const Color(0xFF70FACC) : Colors.transparent,
                   foregroundColor: Colors.white,
-                  side: isPrimary ? null : const BorderSide(color: Color(0xFF70FACC), width: 2),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  side: isPrimary
+                      ? null
+                      : const BorderSide(color: Color(0xFF70FACC), width: 2),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20)),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 onPressed: onPressed,
                 child: Text(
                   text,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -192,5 +206,5 @@ class BackgroundPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate)=>true;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }

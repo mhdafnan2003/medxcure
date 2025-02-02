@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:medxecure/screens/booking/booking.dart';
 
 
-class appointmentPage extends StatelessWidget {
-  const appointmentPage({super.key});
+class AppointmentPage extends StatelessWidget {
+  const AppointmentPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1A1B2E),
+      backgroundColor: const Color(0xFF1A1B2E),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -18,6 +19,11 @@ class appointmentPage extends StatelessWidget {
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
                   children: [
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+                    ),
+                    const SizedBox(width: 8),
                     const CircleAvatar(
                       radius: 25,
                       child: Icon(Icons.person),
@@ -28,28 +34,21 @@ class appointmentPage extends StatelessWidget {
                       children: const [
                         Text(
                           'Welcome Back',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                          ),
+                          style: TextStyle(color: Colors.white, fontSize: 14),
                         ),
                         Text(
                           'Mr. Williamson',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
                     const Spacer(),
                     IconButton(
-                      icon: const Icon(Icons.search),
+                      icon: const Icon(Icons.search, color: Colors.white),
                       onPressed: () {},
                     ),
                     IconButton(
-                      icon: const Icon(Icons.notifications_outlined),
+                      icon: const Icon(Icons.notifications_outlined, color: Colors.white),
                       onPressed: () {},
                     ),
                   ],
@@ -69,11 +68,7 @@ class appointmentPage extends StatelessWidget {
                   children: [
                     const Text(
                       'Looking for\ndesired doctor?',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 16),
                     Container(
@@ -101,20 +96,12 @@ class appointmentPage extends StatelessWidget {
                   children: [
                     const Text(
                       'Find your doctor',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     TextButton(
                       onPressed: () {},
-                      child: Row(
-                        children: const [
-                          Text('See All'),
-                          Icon(Icons.chevron_right),
-
-                        ],
+                      child: const Row(
+                        children: [Text('See All'), Icon(Icons.chevron_right)],
                       ),
                     ),
                   ],
@@ -123,7 +110,7 @@ class appointmentPage extends StatelessWidget {
 
               // Category Icons
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -143,19 +130,12 @@ class appointmentPage extends StatelessWidget {
                   children: [
                     const Text(
                       'Popular Doctors',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     TextButton(
                       onPressed: () {},
-                      child: Row(
-                        children: const [
-                          Text('See All'),
-                          Icon(Icons.chevron_right),
-                        ],
+                      child: const Row(
+                        children: [Text('See All'), Icon(Icons.chevron_right)],
                       ),
                     ),
                   ],
@@ -169,6 +149,7 @@ class appointmentPage extends StatelessWidget {
                 '4.5',
                 '2530',
                 '50.99',
+                context,
               ),
               _buildDoctorCard(
                 'Lauren Hemp',
@@ -176,12 +157,12 @@ class appointmentPage extends StatelessWidget {
                 '4.5',
                 '2530',
                 '50.99',
+                context,
               ),
             ],
           ),
         ),
       ),
-
     );
   }
 
@@ -197,34 +178,25 @@ class appointmentPage extends StatelessWidget {
           child: Icon(icon, color: Colors.teal),
         ),
         const SizedBox(height: 8),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12,color: Colors.white),
-        ),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.white)),
       ],
     );
   }
 
   Widget _buildDoctorCard(
-      String name,
-      String specialization,
-      String rating,
-      String reviews,
-      String fee,
-      ) {
+    String name,
+    String specialization,
+    String rating,
+    String reviews,
+    String fee,
+    BuildContext context,
+  ) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 5,
-          ),
-        ],
       ),
       child: Row(
         children: [
@@ -237,46 +209,18 @@ class appointmentPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  specialization,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
-                ),
+                Text(name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(specialization, style: const TextStyle(color: Colors.grey)),
                 Row(
-                  children: [
-                    const Icon(Icons.star, color: Colors.amber, size: 16),
-                    Text(' $rating ($reviews)'),
-                  ],
+                  children: [const Icon(Icons.star, color: Colors.amber, size: 16), Text(' $rating ($reviews)')],
                 ),
               ],
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                'Fees: \$$fee',
-                style: const TextStyle(color: Colors.white),
-              ),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                ),
-                child: const Text('Book Now'),
-              ),
-            ],
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => const DoctorProfilePage())),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
+            child: const Text('Book Now'),
           ),
         ],
       ),

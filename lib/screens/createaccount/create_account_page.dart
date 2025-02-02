@@ -1,4 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:medxecure/screens/admin/adminHome.dart';
+import 'package:medxecure/screens/doctor/doctorHome.dart';
+import 'package:medxecure/screens/home/home.dart';
+import 'package:medxecure/screens/welcomeback/welcomeback.dart';
+
 
 class CreateAccountPage extends StatefulWidget {
   const CreateAccountPage({super.key});
@@ -9,19 +16,20 @@ class CreateAccountPage extends StatefulWidget {
 
 class _CreateAccountPageState extends State<CreateAccountPage> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final nameController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  final _nameController = TextEditingController();
 
   bool _isEmailValid = true;
-  bool _isPhoneValid = true;
-  bool _passwordsMatch = true;
 
   // Validation patterns
   final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
   final phoneRegex = RegExp(r'^\+?[\d\s-]{10,12}$');
+
+  // Add this field at the start of the class
+  String? selectedUserType;
 
   void validateEmail(String value) {
     setState(() {
@@ -31,25 +39,21 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
   void validatePhone(String value) {
     String cleanPhone = value.replaceAll(RegExp(r'[\s-]'), '');
-    setState(() {
-      _isPhoneValid = phoneRegex.hasMatch(cleanPhone);
-    });
+    setState(() {});
   }
 
   void validatePasswords() {
     setState(() {
-      _passwordsMatch = _passwordController.text == _confirmPasswordController.text;
+      passwordController.text == _confirmPasswordController.text;
     });
   }
 
   bool validateForm() {
     return _isEmailValid &&
-        _isPhoneValid &&
-        _passwordsMatch &&
-        _passwordController.text.isNotEmpty &&
-        _nameController.text.isNotEmpty &&
-        _emailController.text.isNotEmpty &&
-        _phoneController.text.isNotEmpty;
+        emailController.text.isNotEmpty &&
+        passwordController.text.isNotEmpty &&
+        nameController.text.isNotEmpty &&
+        selectedUserType != null;
   }
 
   InputDecoration getInputDecoration({
@@ -59,6 +63,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   }) {
     return InputDecoration(
       filled: true,
+      // ignore: deprecated_member_use
       fillColor: Colors.white.withOpacity(0.08),
       hintText: hintText,
       hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
@@ -82,22 +87,116 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
       errorText: errorText,
       errorStyle: const TextStyle(color: Colors.red),
       contentPadding: const EdgeInsets.symmetric(vertical: 16),
+      // ignore: deprecated_member_use
       hoverColor: Colors.white.withOpacity(0.1),
     );
   }
 
   @override
   void dispose() {
-    _emailController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    nameController.dispose();
     _phoneController.dispose();
-    _passwordController.dispose();
     _confirmPasswordController.dispose();
-    _nameController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    Future<void> userSignUp() async {
+      if (!validateForm()) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Please fill all fields correctly")),
+        );
+        return;
+      }
+
+      if (selectedUserType == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Please select a user type")),
+        );
+        return;
+      }
+
+      try {
+        var url = Uri.parse("http://localhost:3000/api/auth/signup");
+        print('Attempting to connect to: $url');
+
+        var requestBody = {
+          "email": emailController.text.trim(),
+          "password": passwordController.text.trim(),
+          "name": nameController.text.trim(),
+          "role": selectedUserType?.toLowerCase(),
+        };
+        print('Sending request with data: ${jsonEncode(requestBody)}');
+
+        var response = await http.post(
+          url,
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Access-Control-Allow-Origin": "*"
+          },
+          body: jsonEncode(requestBody),
+        );
+
+        print('Response status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+
+        if (response.statusCode == 201 || response.statusCode == 200) {
+          emailController.clear();
+          passwordController.clear();
+          nameController.clear();
+          _confirmPasswordController.clear();
+
+          // Navigate based on user role
+          // ignore: use_build_context_synchronously
+          switch (selectedUserType?.toLowerCase()) {
+            case 'Admin':
+              Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (ctx) => const MedicineAdmin()));
+              break;
+            case 'Doctor':
+              Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (ctx) => const Doctorhome()));
+              break;
+            case 'User':
+              Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (ctx) => const HomePage()));
+              break;
+            default:
+              Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (ctx) => const WelcomeScreen()));
+          }
+        } else {
+          var errorMessage = response.body;
+          try {
+            var jsonResponse = jsonDecode(response.body);
+            errorMessage = jsonResponse['message'] ?? response.body;
+          } catch (e) {
+            print('Error parsing response: $e');
+          }
+
+          // ignore: use_build_context_synchronously
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Registration failed: $errorMessage"),
+              duration: const Duration(seconds: 5),
+            ),
+          );
+        }
+      } catch (e) {
+        print('Error details: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Connection Error: $e"),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFF1A1B2E),
       body: SafeArea(
@@ -136,8 +235,52 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     ),
                   ),
                   const SizedBox(height: 32),
+                  Container(
+                    decoration: BoxDecoration(
+                      // ignore: deprecated_member_use
+                      color: Colors.white.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        isExpanded: true,
+                        value: selectedUserType,
+                        hint: const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            'Select User Type',
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        ),
+                        dropdownColor: const Color(0xFF2A2B3E),
+                        icon: const Padding(
+                          padding: EdgeInsets.only(right: 16),
+                          child: Icon(Icons.arrow_drop_down,
+                              color: Colors.white70),
+                        ),
+                        items: ['Admin', 'Doctor', 'User']
+                            .map((String value) => DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16),
+                                    child: Text(value,
+                                        style: const TextStyle(
+                                            color: Colors.white)),
+                                  ),
+                                ))
+                            .toList(),
+                        onChanged: (newValue) {
+                          setState(() {
+                            selectedUserType = newValue;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   TextField(
-                    controller: _nameController,
+                    controller: nameController,
                     style: const TextStyle(color: Colors.white),
                     decoration: getInputDecoration(
                       hintText: 'FULL NAME',
@@ -146,35 +289,22 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                   ),
                   const SizedBox(height: 16),
                   TextField(
-                    controller: _phoneController,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: getInputDecoration(
-                      hintText: 'PHONE',
-                      icon: Icons.phone_android,
-                      errorText: !_isPhoneValid && _phoneController.text.isNotEmpty
-                          ? 'Invalid phone number'
-                          : null,
-                    ),
-                    keyboardType: TextInputType.phone,
-                    onChanged: validatePhone,
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _emailController,
+                    controller: emailController,
                     style: const TextStyle(color: Colors.white),
                     decoration: getInputDecoration(
                       hintText: 'EMAIL',
                       icon: Icons.email_outlined,
-                      errorText: !_isEmailValid && _emailController.text.isNotEmpty
-                          ? 'Invalid email address'
-                          : null,
+                      errorText:
+                          !_isEmailValid && emailController.text.isNotEmpty
+                              ? 'Invalid email address'
+                              : null,
                     ),
                     keyboardType: TextInputType.emailAddress,
                     onChanged: validateEmail,
                   ),
                   const SizedBox(height: 16),
                   TextField(
-                    controller: _passwordController,
+                    controller: passwordController,
                     obscureText: true,
                     style: const TextStyle(color: Colors.white),
                     decoration: getInputDecoration(
@@ -183,36 +313,13 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     ),
                     onChanged: (value) => validatePasswords(),
                   ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _confirmPasswordController,
-                    obscureText: true,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: getInputDecoration(
-                      hintText: 'CONFIRM PASSWORD',
-                      icon: Icons.lock_outline,
-                      errorText: !_passwordsMatch && _confirmPasswordController.text.isNotEmpty
-                          ? 'Passwords do not match'
-                          : null,
-                    ),
-                    onChanged: (value) => validatePasswords(),
-                  ),
                   const SizedBox(height: 40),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        if (validateForm()) {
-                          // Handle successful signup
-                          Navigator.pushReplacementNamed(context, '/profile');
-                        } else {
-                          // Show error message
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Please check all fields'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          await userSignUp();
                         }
                       },
                       style: ElevatedButton.styleFrom(

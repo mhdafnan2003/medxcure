@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:medxecure/screens/appointment/appointment.dart';
+import 'package:medxecure/screens/authenticity/authenticity.dart';
+import 'package:medxecure/screens/consultation/consultation_history.dart';
 import 'dart:math' as math;
+
+import 'package:medxecure/screens/welcomeback/welcomeback.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -118,7 +123,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                         color: const Color(0xFF70FACC),
                                         size: 34,
                                       ),
-                                      onPressed: () {},
+                                      onPressed: ()=>{
+                                        Navigator.of(context).push(MaterialPageRoute(builder: (ctx)=>WelcomeScreen()))
+
+
+
+                                      },
                                     ),
                                   ],
                                 ),
@@ -185,11 +195,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                         'Book Your Visit',
                         Icons.add_circle,
                         0,
+                        () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (ctx)=>AppointmentPage()));
+                      },
                       ),
                       _buildAnimatedCard(
                         'View Consultation History',
                         Icons.arrow_forward,
                         1,
+                        () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (ctx)=>DoctorListScreen()));
+                      },
                       ),
                     ],
                   ),
@@ -234,7 +250,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                 ),
                                 padding: const EdgeInsets.symmetric(vertical: 30),
                               ),
-                              onPressed: () {},
+                              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (ctx)=>MedicineAuthPage())),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -269,7 +285,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
   }
 
-  Widget _buildAnimatedCard(String title, IconData icon, int index) {
+  Widget _buildAnimatedCard(String title, IconData icon, int index,VoidCallback onpress) {
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0, end: 1),
       duration: Duration(milliseconds: 800 + (index * 200)),
@@ -312,7 +328,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     bottom: icon == Icons.arrow_forward ? 10 : null,
                     child: IconButton(
                       icon: Icon(icon, color: const Color(0xFF70FACC), size: 36),
-                      onPressed: () {},
+                      onPressed: onpress
                     ),
                   ),
                   Padding(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medxecure/screens/welcomeback/welcomeback.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -878,7 +879,7 @@ class _DoctorHomePageState extends State<DoctorHomePage> {
                   icon: Icons.logout,
                   title: 'Logout',
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.of(context).push(MaterialPageRoute(builder: (ctx)=>WelcomeScreen()));
                     // Handle logout
                   },
                   isDestructive: true,
